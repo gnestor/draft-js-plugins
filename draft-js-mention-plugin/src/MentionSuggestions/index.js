@@ -182,9 +182,11 @@ export class MentionSuggestions extends Component {
   };
 
   onDownArrow = (keyboardEvent) => {
-    keyboardEvent.preventDefault();
-    const newIndex = this.state.focusedOptionIndex + 1;
-    this.onMentionFocus(newIndex >= this.props.suggestions.length ? 0 : newIndex);
+    if (this.state.isActive) {
+      keyboardEvent.preventDefault();
+      const newIndex = this.state.focusedOptionIndex + 1;
+      this.onMentionFocus(newIndex >= this.props.suggestions.size ? 0 : newIndex);
+    }
   };
 
   onTab = (keyboardEvent) => {
@@ -193,10 +195,12 @@ export class MentionSuggestions extends Component {
   };
 
   onUpArrow = (keyboardEvent) => {
-    keyboardEvent.preventDefault();
-    if (this.props.suggestions.length > 0) {
-      const newIndex = this.state.focusedOptionIndex - 1;
-      this.onMentionFocus(newIndex < 0 ? this.props.suggestions.length - 1 : newIndex);
+    if (this.state.isActive) {
+      keyboardEvent.preventDefault();
+      if (this.props.suggestions.size > 0) {
+        const newIndex = this.state.focusedOptionIndex - 1;
+        this.onMentionFocus(newIndex < 0 ? this.props.suggestions.size - 1 : newIndex);
+      }
     }
   };
 
