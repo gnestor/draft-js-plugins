@@ -2,6 +2,24 @@
 import React from 'react';
 import { getVisibleSelectionRect } from 'draft-js';
 
+const inCodeBlock = (editorState) => {
+  const startKey = editorState.getSelection().getStartKey();
+  const endKey = editorState.getSelection().getEndKey();
+  if (startKey && endKey) {
+    const contentState = editorState.getCurrentContent();
+    const blocks = contentState.getBlocksAsArray();
+
+    const selectedBlocks = blocks.slice(
+      Math.max(blocks.indexOf(contentState.getBlockForKey(startKey)) - 1, 0),
+      Math.min(blocks.indexOf(contentState.getBlockForKey(endKey)) + 1, blocks.length)
+    );
+
+    return selectedBlocks.find((block) => block.getType() === 'code-block');
+  }
+
+  return false;
+};
+
 export default class Toolbar extends React.Component {
 
   state = {
@@ -77,9 +95,10 @@ export default class Toolbar extends React.Component {
     const { store } = this.props;
     const { overrideContent, position } = this.state;
     const selection = store.getItem('getEditorState')().getSelection();
+    const editorState = store.getItem('getEditorState')();
     // overrideContent could for example contain a text input, hence we always show overrideContent
     // TODO: Test readonly mode and possibly set isVisible to false if the editor is readonly
-    const isVisible = (!selection.isCollapsed() && selection.getHasFocus()) || overrideContent;
+    const isVisible = (!selection.isCollapsed() && selection.getHasFocus() && !inCodeBlock(editorState)) || overrideContent;
     const style = { ...position };
 
     if (isVisible) {
