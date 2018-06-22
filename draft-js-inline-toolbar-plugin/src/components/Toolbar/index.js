@@ -2,6 +2,19 @@
 import React from 'react';
 import { getVisibleSelectionRect } from 'draft-js';
 
+const getRelativeParent = (element) => {
+  if (!element) {
+    return null;
+  }
+
+  const position = window.getComputedStyle(element).getPropertyValue('position');
+  if (position !== 'static') {
+    return element;
+  }
+
+  return getRelativeParent(element.parentElement);
+};
+
 const inCodeBlock = (editorState) => {
   const startKey = editorState.getSelection().getStartKey();
   const endKey = editorState.getSelection().getEndKey();
@@ -57,35 +70,16 @@ export default class Toolbar extends React.Component {
     // when focusing editor with already present selection
     setTimeout(() => {
       if (!this.toolbar) return;
-
-      // The editor root should be two levels above the node from
-      // `getEditorRef`. In case this changes in the future, we
-      // attempt to find the node dynamically by traversing upwards.
-      const editorRef = this.props.store.getItem('getEditorRef')();
-      if (!editorRef) return;
-
-      // This keeps backwards compatibility with React 15
-      let editorRoot = editorRef.refs && editorRef.refs.editor
-        ? editorRef.refs.editor : editorRef.editor;
-      while (editorRoot.className.indexOf('DraftEditor-root') === -1) {
-        editorRoot = editorRoot.parentNode;
-      }
-      const editorRootRect = editorRoot.getBoundingClientRect();
-
+      const relativeParent = getRelativeParent(this.toolbar.parentElement);
+      const toolbarHeight = this.toolbar.clientHeight;
+      const relativeRect = (relativeParent || document.body).getBoundingClientRect();
       const selectionRect = getVisibleSelectionRect(window);
+
       if (!selectionRect) return;
 
-      // The toolbar shouldn't be positioned directly on top of the selected text,
-      // but rather with a small offset so the caret doesn't overlap with the text.
-      const extraTopOffset = -5;
-
       const position = {
-        top: (editorRoot.offsetTop - this.toolbar.offsetHeight)
-          + (selectionRect.top - editorRootRect.top)
-          + extraTopOffset,
-        left: editorRoot.offsetLeft
-          + (selectionRect.left - editorRootRect.left)
-          + (selectionRect.width / 2)
+        top: (selectionRect.top - relativeRect.top) - toolbarHeight,
+        left: (selectionRect.left - relativeRect.left) + (selectionRect.width / 2),
       };
       this.setState({ position });
     });
@@ -94,8 +88,8 @@ export default class Toolbar extends React.Component {
   getStyle() {
     const { store } = this.props;
     const { overrideContent, position } = this.state;
-    const selection = store.getItem('getEditorState')().getSelection();
     const editorState = store.getItem('getEditorState')();
+    const selection = editorState.getSelection();
     // overrideContent could for example contain a text input, hence we always show overrideContent
     // TODO: Test readonly mode and possibly set isVisible to false if the editor is readonly
     const isVisible = (!selection.isCollapsed() && selection.getHasFocus() && !inCodeBlock(editorState)) || overrideContent;

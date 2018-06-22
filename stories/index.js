@@ -39,7 +39,6 @@ import AddImageEditor from './Image/AddImageEditor';
 import SimpleInlineToolbarEditor from './InlineToolbar/SimpleInlineToolbarEditor';
 import CustomInlineToolbarEditor from './InlineToolbar/CustomInlineToolbarEditor';
 import ThemedInlineToolbarEditor from './InlineToolbar/ThemedInlineToolbarEditor';
-import RelativeParentInlineToolbarEditor from './InlineToolbar/RelativeParentInlineToolbarEditor';
 
 // Linkify
 import SimpleLinkifyEditor from './Linkify/SimpleLinkifyEditor';
@@ -112,8 +111,7 @@ storiesOf('Image Plugin')
 storiesOf('Inline Toolbar Plugin')
   .add('Editor with default inline toolbar plugin', () => <SimpleInlineToolbarEditor />)
   .add('Editor with inline toolbar plugin containing all buttons', () => <CustomInlineToolbarEditor />)
-  .add('Editor with custom themed toolbar plugin', () => <ThemedInlineToolbarEditor />)
-  .add('Relatively positioned parent', () => <RelativeParentInlineToolbarEditor />);
+  .add('Editor with custom themed toolbar plugin', () => <ThemedInlineToolbarEditor />);
 
 storiesOf('Linkify Plugin')
   .add('Editor with Linkify Plugin', () => <SimpleLinkifyEditor />)
